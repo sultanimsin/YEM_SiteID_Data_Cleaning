@@ -1,4 +1,4 @@
-# cccm Site Monitoring Tool - Data Cleaning script
+# CCCM Site Monitoring Tool - Data Cleaning script
 # REACH Yemen - alberto.gualtieri@reach-initiative.org
 # V2
 # 25/10/2019
@@ -8,28 +8,29 @@ today <- Sys.Date()
 
 ## Download necessary packages
 # devtools::install_github("mabafaba/xlsformfill", force = T)
-# devtools::install_github("mabafaba/cleaninginspectoR", force = T)
+ devtools::install_github("mabafaba/cleaninginspectoR", force = T)
 # devtools::install_github("agualtieri/dataqualitycontol", force = T)
 
 ## Load libraries
-library(tidyverse)
-library(xlsformfill)
-library(dataqualitycontrol)
-library(cleaninginspectoR)
-library(koboloadeR)
+require(tidyverse)
+require(xlsformfill)
+require(dataqualitycontrol)
+require(cleaninginspectoR)
+# require(koboloadeR)
 
 ## Download data from kobo server
 # datasets <- kobo_datasets("reach_yemen:KOBOyemREACH2017", "kobohr")
 # kobo_data_downloader("412367", "reach_yemen:KOBOyemREACH2017", "kobohr")
 
 ## Fake data just for testing
-choices <- read.csv("./data/choices.csv", stringsAsFactors = F, check.names = F)
-questions <- read.csv("./data/questions.csv", stringsAsFactors = F, check.names = F)
-questions$name <- tolower(questions$name)
+#choices <- read.csv("./data/choices.csv", stringsAsFactors = F, check.names = F)
+#questions <- read.csv("./data/questions.csv", stringsAsFactors = F, check.names = F)
+#questions$name <- tolower(questions$name)
 
-response <- xlsform_fill(questions,
-                         choices,
-                         500)
+# response <- xlsform_fill(questions, choices,500)
+ 
+## Upload data to be cleaned
+response <- read.csv("./data/[file name].csv", stringsAsFactors = F)
 
 ## Anonymize dataset
 response <- anonymise_dataset(response, c("start", "end", "deviceid", "imei", "q0_1_enumerator_name", "q0_2_gender", "q0_3_organization", "q0_3_organization_other", "q1_1_key_informant_name",
@@ -39,10 +40,10 @@ response <- anonymise_dataset(response, c("start", "end", "deviceid", "imei", "q
 response_issue <- inspect_all(response, "uuid")
 write.csv(response_issue, paste0("./output/dataset_issues_",today,".csv"))
 
-## Check 3: run extra cleaning analysis
+## Check 2: run extra cleaning analysis
 ### Check that the site name is in the correct location - TBD
 
-
+## Check 3: Check adequacy
 ### Check that a service defined as a priority need is not classified as adequate
 check_adequacy <- select(response, "uuid", c("rrm_distributions":"waste_disposal_services"), "i1_top_priority_need", "i2_second_priority_need", "i3_third_priority_need")
 
