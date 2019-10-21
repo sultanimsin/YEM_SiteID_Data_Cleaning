@@ -8,15 +8,19 @@ today <- Sys.Date()
 
 ## Download necessary packages
 # devtools::install_github("mabafaba/xlsformfill", force = T)
- devtools::install_github("mabafaba/cleaninginspectoR", force = T)
+# devtools::install_github("mabafaba/cleaninginspectoR", force = T)
 # devtools::install_github("agualtieri/dataqualitycontol", force = T)
 
 ## Load libraries
 require(tidyverse)
-require(xlsformfill)
+#require(xlsformfill)
 require(dataqualitycontrol)
 require(cleaninginspectoR)
 # require(koboloadeR)
+
+## Source
+source("./R/cleanHead.R")
+
 
 ## Download data from kobo server
 # datasets <- kobo_datasets("reach_yemen:KOBOyemREACH2017", "kobohr")
@@ -30,14 +34,29 @@ require(cleaninginspectoR)
 # response <- xlsform_fill(questions, choices,500)
  
 ## Upload data to be cleaned
-response <- read.csv("./data/[file name].csv", stringsAsFactors = F)
+response <- read.csv("./data/CCCM_Site_Id_cluster_V8_07102019_2019_10_14_09_54_25.csv", stringsAsFactors = F)
+
+
+## Remove group name and reduce to all lowercase
+names(response) <- tolower(names(response))
+response <- cleanHead(response)
+response <- cleanHead(response)
+
 
 ## Anonymize dataset
-response <- anonymise_dataset(response, c("start", "end", "deviceid", "imei", "q0_1_enumerator_name", "q0_2_gender", "q0_3_organization", "q0_3_organization_other", "q1_1_key_informant_name",
-                                          "q1_2_key_informat_gender", "q1_3_key_informat_mobile_number", "q5_2_gps_latitude", "a5_1_gps_longitude", "a5_2_gps_latitude", "__version__"))
+#response <- anonymise_dataset(response, c("start", "end", "deviceid", "imei", "q0_1_enumerator_name", "q0_2_gender", "q0_3_organization", "q0_3_organization_other", "q1_1_key_informant_name",
+                                         # "q1_2_key_informat_gender", "q1_3_key_informat_mobile_number", "q5_2_gps_latitude", "a5_1_gps_longitude", "a5_2_gps_latitude", "__version__"))
+
+## Check 0: check that there are no site surveyed twice
+n_occur <- data.frame(table(response$a4_site_name))
+n_occur[n_occur$Freq > 1,]
+
+duplicate_sites <- response[response$a4_site_name %in% n_occur$Var1[n_occur$Freq > 1],]
+
+write.csv(duplicate_sites, paste0("./output/duplicated_sites",today,".csv"))
 
 ## Check 1: run cleaninginspector
-response_issue <- inspect_all(response, "uuid")
+response_issue <- inspect_all(response, "x_uuid")
 write.csv(response_issue, paste0("./output/dataset_issues_",today,".csv"))
 
 ## Check 2: run extra cleaning analysis
@@ -45,7 +64,7 @@ write.csv(response_issue, paste0("./output/dataset_issues_",today,".csv"))
 
 ## Check 3: Check adequacy
 ### Check that a service defined as a priority need is not classified as adequate
-check_adequacy <- select(response, "uuid", c("rrm_distributions":"waste_disposal_services"), "i1_top_priority_need", "i2_second_priority_need", "i3_third_priority_need")
+check_adequacy <- select(response, "x_uuid", c("rrm_distributions":"waste_disposal_services"), "i1_top_priority_need", "i2_second_priority_need", "i3_third_priority_need")
 
 check_adequacy <- check_adequacy %>% mutate(food_check = ifelse((food_distribution == "adequate" & (i1_top_priority_need == "food" | i2_second_priority_need == "food" | i3_third_priority_need == "food")), 1,0))
 check_adequacy <- check_adequacy %>% mutate(water_check = ifelse((wash_services == "adequate" & (i1_top_priority_need == "water" | i2_second_priority_need == "water" | i3_third_priority_need == "water")), 1,0))
@@ -62,3 +81,6 @@ check_adequacy <- check_adequacy %>% mutate(education_check = ifelse((education_
 
 write.csv(check_adequacy, paste0("./output/CCCM_SiteID_adequacy_issues_",today,".csv"), row.names = F)
 browseURL(paste0("./output/CCCM_SiteID_adequacy_issues_",today,".csv"))
+
+
+
