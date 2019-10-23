@@ -9,16 +9,21 @@ today <- Sys.Date()
 ## Download necessary packages
 # devtools::install_github("mabafaba/xlsformfill", force = T)
 # devtools::install_github("mabafaba/cleaninginspectoR", force = T)
-# devtools::install_github("agualtieri/dataqualitycontol", force = T)
+
+
+## Install packages
+install.packages("tidyverse")
+install.packages("data.table")
+install.packages("openxlsx")
 
 ## Load libraries
 require(tidyverse)
-#require(xlsformfill)
 require(dataqualitycontrol)
 require(cleaninginspectoR)
 require(data.table)
 require(openxlsx)
-# require(koboloadeR)
+#require(xlsformfill)
+
 
 ## Source
 source("./R/cleanHead.R")
