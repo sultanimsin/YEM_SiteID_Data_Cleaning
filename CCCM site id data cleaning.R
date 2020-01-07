@@ -255,12 +255,10 @@ wrong_lat_long_melt$fix <- "Checked with partner"
 wrong_lat_long_melt$checked_by <- "ON"
 wrong_lat_long_melt$issue_type <- "The GPS coordinates provided may contain errors"
 
-wrong_lat_long_melt$variable <- if(wrong_lat_long_melt$variable == "wrong_longitude") 
-                                {wrong_lat_long_melt$variable <- "a5_1_gps_longitude"} else {wrong_lat_long_melt$variable <- "a5_2_gps_latitude"}
+wrong_lat_long_melt$variable <- ifelse(wrong_lat_long_melt$variable == "wrong_longitude", "a5_1_gps_longitude", "a5_2_gps_latitude")
+wrong_lat_long_melt$old_value <- ifelse(wrong_lat_long_melt$variable == "a5_1_gps_longitude", wrong_lat_long_melt$a5_1_gps_longitude, wrong_lat_long_melt$a5_2_gps_latitude)
 
-wrong_lat_long_melt$old_value <- if(wrong_lat_long_melt$variable == "a5_1_gps_longitude") 
-                                {wrong_lat_long_melt$old_value <- wrong_lat_long_melt$a5_1_gps_longitude} else {wrong_lat_long_melt$old_value <- wrong_lat_long_melt$a5_2_gps_latitude}
-                      
+
 
 gps_log <- data.frame(uuid = wrong_lat_long_melt$uuid, 
                       agency = wrong_lat_long_melt$q0_3_organization, 
