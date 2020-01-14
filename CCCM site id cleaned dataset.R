@@ -147,7 +147,8 @@ final_dashboard <- final_dashboard[moveme(names(final_dashboard), "q0_4_date aft
 
 
 
-write.xlsx(final_dashboard, paste0("./output/dashboard/CCCM_Site Reporting_December V2_",today,".xlsx"))
+write.xlsx(final_dashboard, paste0("./output/dashboard/CCCM_Site Reporting_V2_",today,".xlsx"))
+
 
 #write.xlsx(final_dataset, paste0("./output/CCCM_SiteReporting_Week 1 Cleaned_",today,".xlsx"))
 
@@ -159,16 +160,19 @@ write.xlsx(final_dashboard, paste0("./output/dashboard/CCCM_Site Reporting_Decem
 #### INTERNAL
 final_dataset_internal <- anonymise_dataset(clean_data, c("start", "end", "q0_1_enumerator_name", "q0_2_gender", "q1_1_key_informant_name",
                                                     "q1_2_key_informat_gender", "q1_3_key_informat_mobile_number", "a5_gps_coordinates", "_id", "_submission_time",
-                                                    "q0_3_organization_other", "a4_site_name2", "comments", "comments_001", "a4_other_site", "q0_4_date"))
+                                                    "q0_3_organization_other", "a4_site_name2", "comments", "comments_001", "a4_other_site", "q0_4_date",
+                                                    "b3_exu_fp_mobile_number", "b4_site_smc_agency_name", "b5_smc_agency_fp_name", "b6_smc_agency_fp_mobile_number",
+                                                    "b7_community_committee_in_place", "b8_community_committee_fp_name", "b9_community_committee_fp_cell"))
 
 
-write.xlsx(final_dataset_internal, paste0("./output/internal/CCCM_SiteReporting_December V2 Internal_",today,".xlsx"))
+write.xlsx(final_dataset_internal, paste0("./output/internal/CCCM_SiteReporting_V2 Internal_",today,".xlsx"))
 
 #### EXTERNAL
 final_dataset_external <- anonymise_dataset(clean_data, c("start", "end", "q0_1_enumerator_name", "q0_2_gender", "q1_1_key_informant_name",
                                                              "q1_2_key_informat_gender", "q1_3_key_informat_mobile_number", "a5_gps_coordinates", "__version__", "_id", "_submission_time", "_validation_status",
                                                              "q0_3_organization_other", "a4_site_name2", "comments", "comments_001", "a4_other_site", "a5_1_gps_longitude", "a5_2_gps_latitude", "b2_exu_fp_name",
                                                              "b2_exu_fp_name", "b3_exu_fp_mobile_number", "b5_smc_agency_fp_name", "b6_smc_agency_fp_mobile_number", "b8_community_committee_fp_name", "b9_community_committee_fp_cell",
-                                                             "q0_3_organization", "q0_4_date"))
+                                                             "q0_3_organization", "q0_4_date", "b3_smc_agency_fp_name", "b4_smc_agency_fp_mobile_number", "b6_community_committee_fp_name", "b7_community_committee_fp_cell in external",
+                                                             "b4_site_smc_agency_name", "b7_community_committee_in_place"))
 
-write.xlsx(final_dataset_external, paste0("./output/external/CCCM_SiteReporting_December V2 External_",today,".xlsx"))    
+write.xlsx(final_dataset_external, paste0("./output/external/CCCM_SiteReporting_V2 External_",today,".xlsx"))    

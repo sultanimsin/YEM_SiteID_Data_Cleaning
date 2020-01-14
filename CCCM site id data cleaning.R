@@ -1,7 +1,7 @@
 # CCCM Site Monitoring Tool - Data Cleaning script
 # REACH Yemen - alberto.gualtieri@reach-initiative.org
-# V7
-# 30/11/2019
+# V8
+# 09/11/2019
 
 rm(list=ls())
 today <- Sys.Date()
@@ -10,6 +10,8 @@ today <- Sys.Date()
 # devtools::install_github("mabafaba/xlsformfill", force = T)
 # devtools::install_github("agualtieri/cleaninginspectoR", force = T)
 # devtools::install_github("agualtieri/dataqualitycontrol", force = T)
+# devtools::install_github("mabafaba/clog", force = T)
+
 
 ## Install packages
 #install.packages("tidyverse")
@@ -31,7 +33,7 @@ require(clog)
 
 ## Source
 source("./R/cleanHead.R")
-source("./R/time_check.R")
+source("./R/check_time.R")
 
 
 ## Download data from kobo server
@@ -46,7 +48,7 @@ source("./R/time_check.R")
 # response <- xlsform_fill(questions, choices,500)
  
 ## Upload data to be cleaned
-response <- read.xlsx("data/cleaning/CCCM_Site_Reporting (V2)_060120_RAW_Translated_tbc.xlsx")
+response <- read.xlsx("data/cleaning/CCCM_Site_Reporting (V1)_07012020_RAW.xlsx")
 
 
 names(response)[names(response) == "_index"] <- "index"
@@ -129,14 +131,18 @@ if (nrow(duplicate_sites) >= 1) {
 #browseURL(paste0("./output/duplicated_sites_",today,".csv"))
 
 ## Check 1: run cleaninginspector
-response_issue <- inspect_all(response, "uuid") %>%
-  mutate(uuid=response[.$index,"uuid",drop=TRUE], ngo=response[.$index,"q0_3_organization", drop=TRUE], area = response[.$index, "a4_site_name3", drop = TRUE])
+response_issue <- inspect_all(response, "uuid")
 
-issue_table <- response_issue
+response_issue <- response_issue[!grepl("'other' response. may need recoding.", response_issue$issue_type),]
+response_issue <- response_issue[!grepl("Potentially sensitive information.", response_issue$issue_type),]
 
+  
+  if(nrow(response_issue)>=1) {
+    issue_table <- response_issue %>% mutate(uuid=response[.$index,"uuid",drop=TRUE], ngo=response[.$index,"q0_3_organization", drop=TRUE], area = response[.$index, "a4_site_name3", drop = TRUE])
+    
+  } else {issue_table <- response_issue}
+                        
 
-issue_table <- issue_table[!grepl("'other' response. may need recoding.", issue_table$issue_type),]
-issue_table <- issue_table[!grepl("Potentially sensitive information.", issue_table$issue_type),]
 
 if(nrow(issue_table)>=1) {
 
@@ -598,7 +604,10 @@ if (nrow(eviction_red) >=1){
 time_stamp <- select(response, "uuid", "start", "end", "q0_3_organization", "a4_site_name3")
 
 
-check_time <- cleaninginspectoR::check_time(time_stamp, 5, 40)
+#check_time <- cleaninginspectoR::check_time(time_stamp, 5, 30)
+source("./R/check_time.R")
+check_time <- check_time(time_stamp, 5, 40)
+
 
 names(check_time)[names(check_time) == "index"] <- "uuid"
 
@@ -659,12 +668,14 @@ cleaning_log <- plyr::rbind.fill(duplicates_log,
 #### Save adequacy check file for easier user
 final_log <- list("cleaning_log" = cleaning_log,
                   "Service adequacy vs needs" = check_adequacy,
-                  "Time stamp check" = check_time)
-
+                  "Survey lenght" = check_time_log)
 
 write.xlsx(final_log, paste0("./output/CCCM_SiteID_cleaning log_",today,".xlsx"))
 browseURL(paste0("./output/CCCM_SiteID_cleaning log_",today,".xlsx"))
 
+#if (nrow(check_time)>=1) {
+ # write.xlsx(check_time_log, paste0("./output/CCCM_SiteID_time checks log_",today,".xlsx"))
+#} else {print("Surveys were all between 5 and 40 minutes long.")}           
 
 
 
